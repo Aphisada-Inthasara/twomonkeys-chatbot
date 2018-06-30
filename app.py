@@ -8,10 +8,13 @@ LINE_API_KEY = 'Bearer C0sAdrQ8LL9K51GkbID2Cjhw+exDIUZinQXqwjEAj48C/mw4A+UTF9Sft
 
 app = Flask(__name__)
 
-@app.route("/webhook", methods=['GET', 'POST'])
+@app.route('/webhook', methods=['GET', 'POST'])
 def webhook():
-if request.method == 'POST':
-return 'OK'
+    return 'OK'
+#if request.method == 'POST':
+#return 'OK'
+#if request.method == 'GET':
+#return 'OK'
 
 @app.route('/')
 def index():
