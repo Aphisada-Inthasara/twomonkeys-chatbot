@@ -8,14 +8,6 @@ LINE_API_KEY = 'Bearer C0sAdrQ8LL9K51GkbID2Cjhw+exDIUZinQXqwjEAj48C/mw4A+UTF9Sft
 
 app = Flask(__name__)
 
-@app.route('/webhook', methods=['GET', 'POST'])
-def webhook():
-    return 'OK'
-#if request.method == 'POST':
-#return 'OK'
-#if request.method == 'GET':
-#return 'OK'
-
 @app.route('/')
 def index():
     return 'This is chatbot server.'
