@@ -1,4 +1,3 @@
-
 import os, re, json
 from datetime import datetime, date, timedelta
 from flask import Flask, request, abort
@@ -25,11 +24,8 @@ handler = WebhookHandler(channel_secret)
 def homepage():
     the_time = datetime.now().strftime("%A, %d %b %Y %l:%M %p")
 
-    return """
-    <h1>Hello Translator-Bot</h1>
-    <p>It is currently {time}.</p>
-    <img src="http://loremflickr.com/600/400">
-    """.format(time=the_time)
+    return 'OK'
+
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -58,4 +54,3 @@ def handle_message(event):
 
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=True)
-view rawapp.py hosted with ❤ by GitHub
