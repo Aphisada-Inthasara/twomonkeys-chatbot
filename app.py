@@ -31,16 +31,10 @@ def callback():
 
     # get request body as text
     body = request.get_data(as_text=True)
-    app.logger.info("Request body: " + body)
+    print("Request body: " + body)
 
     try:
         events = parser.parse(body, signature)
-        for event in events:
-            if not isinstance(event, MessageEvent):
-                continue
-            if not isinstance(event.message, TextMessage):
-                continue
-
             line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(text=event.message.text)
@@ -50,14 +44,6 @@ def callback():
         print("Unexpected error:", sys.exc_info()[0])
 
     return 'OK'
-
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
-    text = event.message.text
-    print("Ple test msg: " + text)
-    line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=text))
     
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=True)
