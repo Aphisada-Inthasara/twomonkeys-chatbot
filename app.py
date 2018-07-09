@@ -1,54 +1,59 @@
-from flask import Flask, request
-import json
+import os, re, json
+from datetime import datetime, date, timedelta
+from flask import Flask, request, abort
 import requests
-
-# ตรง YOURSECRETKEY ต้องนำมาใส่เองครับจะกล่าวถึงในขั้นตอนต่อๆ ไป
-global LINE_API_KEY
-LINE_API_KEY = 'Bearer C0sAdrQ8LL9K51GkbID2Cjhw+exDIUZinQXqwjEAj48C/mw4A+UTF9Sft0G0u6QWrfkeptnSU4zKZdM18qqV4D3Xgbr1M9AC/BKlA+sKPlFD+6ib43zNMgsuRVAr/Bq3aRFz4z5+vZMq8G3Ld8GZUgdB04t89/1O/w1cDnyilFU='
+from linebot import (
+    LineBotApi, WebhookHandler
+)
+from linebot.exceptions import (
+    InvalidSignatureError
+)
+from linebot.models import (
+    MessageEvent, TextMessage, TextSendMessage,
+)
 
 app = Flask(__name__)
 
+channel_secret = os.getenv('LINE_CHANNEL_SECRET', None)
+channel_access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN', None)
+
+line_bot_api = LineBotApi(channel_access_token)
+handler = WebhookHandler(channel_secret)
+
 @app.route('/')
-def index():
-    return 'This is chatbot server.'
-@app.route('/bot', methods=['POST'])
+def homepage():
+    the_time = datetime.now().strftime("%A, %d %b %Y %l:%M %p")
 
-def bot():
-    # ข้อความที่ต้องการส่งกลับ
-    replyStack = list()
-   
-    # ข้อความที่ได้รับมา
-    msg_in_json = request.get_json()
-    msg_in_string = json.dumps(msg_in_json)
+    return """
+    <h1>Hello Translator-Bot</h1>
+    <p>It is currently {time}.</p>
+    <img src="http://loremflickr.com/600/400">
+    """.format(time=the_time)
 
-    # Token สำหรับตอบกลับ (จำเป็นต้องใช้ในการตอบกลับ)
-    replyToken = msg_in_json["events"][0]['replyToken']
+@app.route("/callback", methods=['POST'])
+def callback():
+    # get X-Line-Signature header value
+    signature = request.headers['X-Line-Signature']
 
-    # ทดลอง Echo ข้อความกลับไปในรูปแบบที่ส่งไป-มา (แบบ json)
-    replyStack.append(msg_in_string)
-    reply(replyToken, replyStack[:5])
+    # get request body as text
+    body = request.get_data(as_text=True)
+    app.logger.info("Request body: " + body)
 
-    return 'OK',200
+    # handle webhook body
+    try:
+        handler.handle(body, signature)
+    except InvalidSignatureError:
+        abort(400)
 
-def reply(replyToken, textList):
-    # Method สำหรับตอบกลับข้อความประเภท text กลับครับ เขียนแบบนี้เลยก็ได้ครับ
-    LINE_API = 'https://api.line.me/v2/bot/message/reply'
-    headers = {
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': LINE_API_KEY
-    }
-    msgs = []
-    for text in textList:
-        msgs.append({
-            "type":"text",
-            "text":text
-        })
-    data = json.dumps({
-        "replyToken":replyToken,
-        "messages":msgs
-    })
-    requests.post(LINE_API, headers=headers, data=data)
-    return
+    return 'OK'
 
-if __name__ == '__main__':
-    app.run()
+@handler.add(MessageEvent, message=TextMessage)
+def handle_message(event):
+    text = event.message.text
+    line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=text))
+    
+
+if __name__ == "__main__":
+    app.run(debug=True, use_reloader=True)
