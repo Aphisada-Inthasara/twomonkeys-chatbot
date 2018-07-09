@@ -35,6 +35,12 @@ def callback():
     print("Request body: " + body)
     print("Signature: " + signature)
 
+    # handle webhook body
+    try:
+        handler.handle(body, signature)
+    except InvalidSignatureError:
+        abort(400)
+        
     return 'OK'
 
 @handler.add(MessageEvent, message=TextMessage)
