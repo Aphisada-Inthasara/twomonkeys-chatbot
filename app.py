@@ -15,6 +15,15 @@ app = Flask(__name__)
 line_bot_api = LineBotApi('YOUR_CHANNEL_ACCESS_TOKEN')
 handler = WebhookHandler('YOUR_CHANNEL_SECRET')
 
+@app.route('/')
+def homepage():
+    the_time = datetime.now().strftime("%A, %d %b %Y %l:%M %p")
+
+    return """
+    <h1>Hello Translator-Bot</h1>
+    <p>It is currently {time}.</p>
+    <img src="http://loremflickr.com/600/400">
+    """.format(time=the_time)
 
 @app.route("/callback", methods=['POST'])
 def callback():
