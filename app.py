@@ -21,7 +21,7 @@ line_bot_api = LineBotApi(channel_access_token)
 handler = WebhookHandler(channel_secret)
 
 @app.route('/')
-def home():
+def homepage():
 return 'OK'
 
 
