@@ -1,5 +1,5 @@
 import os, re, json
-from googletrans import Translator
+
 from flask import Flask, request, abort
 import requests
 
@@ -37,17 +37,12 @@ def callback():
 
     return 'OK'
 
-def translate_text(text):
-    en_text = translator.translate(text, dest='en').text
-    return en_text
-
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     text = event.message.text
-    translated = translate_text(text)
     line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text=translated))
+            TextSendMessage(text=text))
     
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=True)
