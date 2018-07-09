@@ -27,20 +27,28 @@ def homepage():
 
 @app.route("/callback", methods=['POST'])
 def callback():
-    # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
 
     # get request body as text
     body = request.get_data(as_text=True)
-    print("Request body: " + body)
-    print("Signature: " + signature)
+    app.logger.info("Request body: " + body)
 
-    # handle webhook body
-    #try:
-    #    handler.handle(body, signature)
-    #except InvalidSignatureError:
-    #    abort(400)
-        
+    try:
+        events = parser.parse(body, signature)
+        for event in events:
+            if not isinstance(event, MessageEvent):
+                continue
+            if not isinstance(event.message, TextMessage):
+                continue
+
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text=event.message.text)
+            )
+    except:
+        # handle all exception
+        print("Unexpected error:", sys.exc_info()[0])
+
     return 'OK'
 
 @handler.add(MessageEvent, message=TextMessage)
