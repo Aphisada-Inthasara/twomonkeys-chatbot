@@ -1,8 +1,5 @@
-
-import os, re, json
-from datetime import datetime, date, timedelta
 from flask import Flask, request, abort
-import requests
+
 from linebot import (
     LineBotApi, WebhookHandler
 )
@@ -20,10 +17,6 @@ channel_access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN', None)
 
 line_bot_api = LineBotApi(channel_access_token)
 handler = WebhookHandler(channel_secret)
-
-@app.route('/')
-def homepage():
-    return 'OK'
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -44,6 +37,5 @@ def handle_message(event):
             event.reply_token,
             TextSendMessage(text=text))
     
-
 if __name__ == "__main__":
     app.run(debug=True, use_reloader=True)
