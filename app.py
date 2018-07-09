@@ -37,6 +37,9 @@ def callback():
 
     return 'OK'
 
+def test(text):
+    return text
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     text = event.message.text
