@@ -38,15 +38,15 @@ def callback():
     app.logger.info("Request body: " + body)
 
     # handle webhook body
-    try:
-        handler.handle(body, signature)
-    except LineBotApiError as e:
-        print("Got exception from LINE Messaging API: %s\n" % e.message)
-        for m in e.error.details:
-            print("  %s: %s" % (m.property, m.message))
-        print("\n")
-    except InvalidSignatureError:
-        abort(400)
+    #try:
+    #    handler.handle(body, signature)
+    #except LineBotApiError as e:
+    #    print("Got exception from LINE Messaging API: %s\n" % e.message)
+    #    for m in e.error.details:
+    #        print("  %s: %s" % (m.property, m.message))
+    #    print("\n")
+    #except InvalidSignatureError:
+    #    abort(400)
 
     return 'OK'
 
