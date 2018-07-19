@@ -1,29 +1,32 @@
-import os, re, json
+import os
+import sys
 
 from flask import Flask, request, abort
-import requests
-
 from linebot import (
-    LineBotApi, WebhookHandler
+    WebhookHandler, LineBotApi
 )
 from linebot.exceptions import (
-    InvalidSignatureError
+    LineBotApiError, InvalidSignatureError
 )
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage,
+    LocationMessage, MessageEvent
 )
-
-app = Flask(__name__)
 
 channel_secret = os.getenv('LINE_CHANNEL_SECRET', None)
 channel_access_token = os.getenv('LINE_CHANNEL_ACCESS_TOKEN', None)
+if channel_secret is None:
+    print('Specify LINE_CHANNEL_SECRET as environment variable.')
+    sys.exit(1)
+if channel_access_token is None:
+    print('Specify LINE_CHANNEL_ACCESS_TOKEN as environment variable.')
+    sys.exit(1)
 
-line_bot_api = LineBotApi(channel_access_token)
 handler = WebhookHandler(channel_secret)
+line_bot_api = LineBotApi(channel_access_token)
+app = Flask(__name__)
 
-@app.route('/')
-def homepage():
-    return 'OK'
+api_url = 'http://www.cityglide.com/api.php'
+
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -35,19 +38,30 @@ def callback():
     app.logger.info("Request body: " + body)
 
     # handle webhook body
-    #try:
-    #    handler.handle(body, signature)
-    #except InvalidSignatureError:
-    #    abort(400)
+    try:
+        handler.handle(body, signature)
+    except LineBotApiError as e:
+        print("Got exception from LINE Messaging API: %s\n" % e.message)
+        for m in e.error.details:
+            print("  %s: %s" % (m.property, m.message))
+        print("\n")
+    except InvalidSignatureError:
+        abort(400)
 
     return 'OK'
 
 
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=event.message.text))
-    
-if __name__ == "__main__":
-    app.run(debug=True, use_reloader=True)
+@app.route('/')
+def hello_world():
+    return 'Hello World!'
+
+
+@handler.add(MessageEvent, message=LocationMessage)
+def handle_location_message(event):
+    lat = event.message.latitude
+    lng = event.message.longitude
+    address = event.message.address
+
+
+if __name__ == '__main__':
+    app.run()
