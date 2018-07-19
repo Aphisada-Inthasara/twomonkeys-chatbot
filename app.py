@@ -9,7 +9,7 @@ from linebot.exceptions import (
     LineBotApiError, InvalidSignatureError
 )
 from linebot.models import (
-    LocationMessage, MessageEvent
+    LocationMessage, MessageEvent, LocationSendMessage
 )
 
 channel_secret = os.getenv('LINE_CHANNEL_SECRET', None)
@@ -38,15 +38,15 @@ def callback():
     app.logger.info("Request body: " + body)
 
     # handle webhook body
-    #try:
-    #    handler.handle(body, signature)
-    #except LineBotApiError as e:
-    #    print("Got exception from LINE Messaging API: %s\n" % e.message)
-    #    for m in e.error.details:
-    #        print("  %s: %s" % (m.property, m.message))
-    #    print("\n")
-    #except InvalidSignatureError:
-    #    abort(400)
+    try:
+        handler.handle(body, signature)
+    except LineBotApiError as e:
+        print("Got exception from LINE Messaging API: %s\n" % e.message)
+        for m in e.error.details:
+            print("  %s: %s" % (m.property, m.message))
+        print("\n")
+    except InvalidSignatureError:
+        abort(400)
 
     return 'OK'
 
@@ -61,7 +61,15 @@ def handle_location_message(event):
     lat = event.message.latitude
     lng = event.message.longitude
     address = event.message.address
+    title = event.message.title
 
+    print("Lat : {}".format(lat))
+    line_bot_api.reply_message(event.reply_token, LocationSendMessage(
+      title=title,
+      address=address,
+      latitude=latitude,
+      longitude=longitude
+    ))
 
 if __name__ == '__main__':
     app.run()
